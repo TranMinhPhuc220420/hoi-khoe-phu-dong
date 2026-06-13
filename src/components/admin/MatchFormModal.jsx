@@ -6,7 +6,8 @@ import { Input } from '../ui/Input.jsx'
 import { Badge } from '../ui/Badge.jsx'
 import { Spinner } from '../ui/Spinner.jsx'
 import { Modal } from './Modal.jsx'
-import { TeamBadge, sortTeamsForSelect } from '../shared/TeamBadge.jsx'
+import { TeamBadge } from '../shared/TeamBadge.jsx'
+import { TeamSelect } from '../shared/TeamSelect.jsx'
 import { STAGE_FILTERS } from '../../constants/stages.js'
 import * as teamsService from '../../services/teams.service.js'
 
@@ -51,37 +52,6 @@ function formatMatchTimePreview(value) {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  })
-}
-
-/**
- * @param {import('../../types/index.js').Team[]} teams
- * @returns {import('react').JSX.Element[]}
- */
-function renderTeamOptions(teams) {
-  const sorted = sortTeamsForSelect(teams)
-  let lastGroup = /** @type {string | null} */ (null)
-
-  return sorted.flatMap((team) => {
-    const groupLabel = team.group ?? 'Khác'
-    const items = []
-
-    if (groupLabel !== lastGroup) {
-      lastGroup = groupLabel
-      items.push(
-        <option key={`group-${groupLabel}`} disabled>
-          — Bảng {groupLabel} —
-        </option>,
-      )
-    }
-
-    items.push(
-      <option key={team.id} value={team.id}>
-        {team.name}
-      </option>,
-    )
-
-    return items
   })
 }
 
@@ -312,24 +282,20 @@ function MatchFormFields({ match, onClose, onSubmit }) {
         <legend className={`${labelClassName} mb-1`}>Cặp đấu</legend>
 
         <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="home-team-select" className={labelClassName}>
-              Đội nhà
-            </label>
-            <select
-              id="home-team-select"
-              value={homeTeamId}
-              onChange={(e) => {
-                setHomeTeamId(e.target.value)
-                setError('')
-              }}
-              className={selectClassName}
-              required
-            >
-              <option value="">Chọn đội nhà</option>
-              {renderTeamOptions(teams)}
-            </select>
-          </div>
+          <TeamSelect
+            id="home-team-select"
+            label="Đội nhà"
+            teams={teams}
+            value={homeTeamId}
+            onChange={(teamId) => {
+              setHomeTeamId(teamId)
+              setError('')
+            }}
+            placeholder="Chọn đội nhà"
+            excludeTeamId={awayTeamId}
+            disabled={isDisabled}
+            required
+          />
 
           <div className="flex justify-center sm:pb-0.5">
             <button
@@ -356,24 +322,20 @@ function MatchFormFields({ match, onClose, onSubmit }) {
             </button>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="away-team-select" className={labelClassName}>
-              Đội khách
-            </label>
-            <select
-              id="away-team-select"
-              value={awayTeamId}
-              onChange={(e) => {
-                setAwayTeamId(e.target.value)
-                setError('')
-              }}
-              className={selectClassName}
-              required
-            >
-              <option value="">Chọn đội khách</option>
-              {renderTeamOptions(teams)}
-            </select>
-          </div>
+          <TeamSelect
+            id="away-team-select"
+            label="Đội khách"
+            teams={teams}
+            value={awayTeamId}
+            onChange={(teamId) => {
+              setAwayTeamId(teamId)
+              setError('')
+            }}
+            placeholder="Chọn đội khách"
+            excludeTeamId={homeTeamId}
+            disabled={isDisabled}
+            required
+          />
         </div>
 
         {sameTeamSelected && (
