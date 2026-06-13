@@ -1,5 +1,6 @@
 import { Modal } from './Modal.jsx'
 import { TransactionLog } from '../public/PenaltySection.jsx'
+import { UserAvatar } from './UserAvatar.jsx'
 import { formatCurrency } from '../../utils/format.js'
 import { filterTransactions } from '../../utils/exportCsv.js'
 import { getMemberCredit, getMemberDebt } from '../../utils/finance.js'
@@ -29,13 +30,23 @@ export function MemberTransactionModal({
     type: typeFilter === 'all' ? undefined : typeFilter,
   })
 
-  const title =
-    typeFilter === 'penalty'
-      ? `Chi tiết phạt — ${user.name}`
-      : `Lịch sử giao dịch — ${user.name}`
+  const titlePrefix =
+    typeFilter === 'penalty' ? 'Chi tiết phạt' : 'Lịch sử giao dịch'
 
   return (
-    <Modal open={open} title={title} onClose={onClose} wide>
+    <Modal
+      open={open}
+      title={
+        <span className="flex items-center gap-2">
+          <UserAvatar user={user} size="md" />
+          <span>
+            {titlePrefix} — {user.name}
+          </span>
+        </span>
+      }
+      onClose={onClose}
+      wide
+    >
       <div className="mb-4 grid gap-2 text-sm sm:grid-cols-3">
         <div>
           <p className="text-secondary">Tổng phạt</p>

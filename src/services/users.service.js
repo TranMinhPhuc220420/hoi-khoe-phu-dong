@@ -17,6 +17,14 @@ import * as transactionsService from './transactions.service.js'
 const COLLECTION = 'users'
 
 /**
+ * @param {string | null | undefined} avatarUrl
+ * @returns {string | null}
+ */
+export function normalizeAvatarUrl(avatarUrl) {
+  return avatarUrl?.trim() || null
+}
+
+/**
  * @param {import('../types/index.js').User} user
  * @returns {number}
  */
@@ -98,7 +106,7 @@ export async function countReferences(id) {
 }
 
 /**
- * @param {{ name: string }} data
+ * @param {{ name: string, avatarUrl?: string | null }} data
  * @returns {Promise<string>}
  */
 export async function create(data) {
@@ -118,6 +126,7 @@ export async function create(data) {
   await setDoc(doc(db, COLLECTION, id), {
     id,
     name: data.name.trim(),
+    avatarUrl: normalizeAvatarUrl(data.avatarUrl),
     totalPoints: 0,
     totalPenalty: 0,
     paidAmount: 0,
@@ -130,7 +139,7 @@ export async function create(data) {
 
 /**
  * @param {string} id
- * @param {{ name?: string }} data
+ * @param {{ name?: string, avatarUrl?: string | null }} data
  * @returns {Promise<void>}
  */
 export async function update(id, data) {
@@ -138,13 +147,20 @@ export async function update(id, data) {
   const user = await getById(id)
   if (!user) throw new Error('Không tìm thấy thành viên')
 
+  const payload = { updatedAt: serverTimestamp() }
+
   if (data.name !== undefined) {
     const nextName = data.name.trim()
     if (!nextName) throw new Error('Nhập tên thành viên')
-    await updateDoc(doc(db, COLLECTION, id), {
-      name: nextName,
-      updatedAt: serverTimestamp(),
-    })
+    payload.name = nextName
+  }
+
+  if (data.avatarUrl !== undefined) {
+    payload.avatarUrl = normalizeAvatarUrl(data.avatarUrl)
+  }
+
+  if (Object.keys(payload).length > 1) {
+    await updateDoc(doc(db, COLLECTION, id), payload)
   }
 }
 

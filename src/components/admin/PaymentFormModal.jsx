@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '../ui/Button.jsx'
 import { Input } from '../ui/Input.jsx'
 import { Modal } from './Modal.jsx'
+import { UserAvatar } from '../shared/UserAvatar.jsx'
 import { formatCurrency } from '../../utils/format.js'
 import {
   formatMemberFinanceOption,
@@ -85,10 +86,13 @@ function PaymentFormFields({ users, preselectedUser, onClose, onSubmit }) {
     return (
       <>
         <div className="space-y-4">
-          <p className="text-sm text-secondary">
-            Thành viên <span className="font-semibold text-primary">{selectedUser.name}</span> sẽ
-            được ghi nhận thanh toán vượt nợ hiện tại.
-          </p>
+          <div className="flex items-center gap-2 text-sm text-secondary">
+            <UserAvatar user={selectedUser} size="md" />
+            <p>
+              Thành viên <span className="font-semibold text-primary">{selectedUser.name}</span> sẽ
+              được ghi nhận thanh toán vượt nợ hiện tại.
+            </p>
+          </div>
 
           <dl className="space-y-2 rounded-lg border border-secondary/20 bg-neutral p-4 text-sm">
             <div className="flex justify-between gap-4">
@@ -146,25 +150,28 @@ function PaymentFormFields({ users, preselectedUser, onClose, onSubmit }) {
         </div>
 
         {selectedUser && (
-          <div className="text-sm text-secondary">
-            {debt > 0 && (
-              <p>
-                Nợ hiện tại:{' '}
-                <span className="font-semibold text-primary">{formatCurrency(debt)}</span>
-              </p>
-            )}
-            {credit > 0 && (
-              <p>
-                Dư trả trước:{' '}
-                <span className="font-semibold text-green-700">{formatCurrency(credit)}</span>
-              </p>
-            )}
-            {debt === 0 && credit === 0 && (
-              <p>
-                Nợ hiện tại:{' '}
-                <span className="font-semibold text-primary">{formatCurrency(0)}</span>
-              </p>
-            )}
+          <div className="flex items-center gap-2 text-sm text-secondary">
+            <UserAvatar user={selectedUser} size="sm" />
+            <div>
+              {debt > 0 && (
+                <p>
+                  Nợ hiện tại:{' '}
+                  <span className="font-semibold text-primary">{formatCurrency(debt)}</span>
+                </p>
+              )}
+              {credit > 0 && (
+                <p>
+                  Dư trả trước:{' '}
+                  <span className="font-semibold text-green-700">{formatCurrency(credit)}</span>
+                </p>
+              )}
+              {debt === 0 && credit === 0 && (
+                <p>
+                  Nợ hiện tại:{' '}
+                  <span className="font-semibold text-primary">{formatCurrency(0)}</span>
+                </p>
+              )}
+            </div>
           </div>
         )}
 

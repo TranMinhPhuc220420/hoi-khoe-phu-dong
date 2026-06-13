@@ -10,6 +10,7 @@
  * @property {number} totalPenalty
  * @property {number} paidAmount
  * @property {number} [sortOrder]
+ * @property {string | null} [avatarUrl]
  */
 
 /**

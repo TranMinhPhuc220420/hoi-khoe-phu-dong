@@ -1,5 +1,6 @@
 import { formatCurrency } from '../../utils/format.js'
 import { getMemberCredit, getMemberDebt } from '../../utils/finance.js'
+import { UserAvatar } from '../shared/UserAvatar.jsx'
 import { PaymentProgress, MemberPaymentStatusBadge } from './PenaltySection.jsx'
 import { Button } from '../ui/Button.jsx'
 
@@ -37,7 +38,10 @@ export function MemberFinanceCard({ user, onViewDetails }) {
   return (
     <div className={`rounded-lg border bg-surface p-4 ${borderClass}`}>
       <div className="flex items-start justify-between gap-2">
-        <p className="font-semibold text-primary">{user.name}</p>
+        <div className="flex items-center gap-2">
+          <UserAvatar user={user} size="md" />
+          <p className="font-semibold text-primary">{user.name}</p>
+        </div>
         <MemberPaymentStatusBadge user={user} />
       </div>
 

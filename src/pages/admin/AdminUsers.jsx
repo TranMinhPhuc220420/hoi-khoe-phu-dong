@@ -8,6 +8,7 @@ import { Table, TableHead, TableBody, TableHeaderCell, TableCell } from '../../c
 import { useToast } from '../../hooks/useToast.js'
 import { formatCurrency } from '../../utils/format.js'
 import * as usersService from '../../services/users.service.js'
+import { UserAvatar } from '../../components/shared/UserAvatar.jsx'
 import { useDataStore } from '../../stores/data.store.js'
 
 export function AdminUsers() {
@@ -157,7 +158,12 @@ export function AdminUsers() {
               return (
                 <tr key={user.id}>
                   <TableCell className="text-secondary">{index + 1}</TableCell>
-                  <TableCell className="font-medium text-primary">{user.name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 font-medium text-primary">
+                      <UserAvatar user={user} size="sm" />
+                      <span>{user.name}</span>
+                    </div>
+                  </TableCell>
                   <TableCell>{user.totalPoints}</TableCell>
                   <TableCell>{formatCurrency(user.totalPenalty)}</TableCell>
                   <TableCell>{formatCurrency(user.paidAmount)}</TableCell>

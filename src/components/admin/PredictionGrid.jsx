@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
 import { Button } from '../ui/Button.jsx'
 import { StarCheckbox } from './StarCheckbox.jsx'
+import { UserAvatar } from '../shared/UserAvatar.jsx'
 import { getStarLimit } from '../../constants/star-limits.js'
 
 /**
  * @typedef {Object} PredictionRow
  * @property {string} userId
  * @property {string} userName
+ * @property {string | null} [avatarUrl]
  * @property {string} [predictionId]
  * @property {number} predictedHome
  * @property {number} predictedAway
@@ -36,6 +38,7 @@ export function PredictionGrid({
       return {
         userId: user.id,
         userName: user.name,
+        avatarUrl: user.avatarUrl ?? null,
         predictionId: existing?.id,
         predictedHome: existing?.predictedHome ?? 0,
         predictedAway: existing?.predictedAway ?? 0,
@@ -100,7 +103,12 @@ export function PredictionGrid({
           <tbody className="divide-y divide-secondary/10">
             {rows.map((row) => (
               <tr key={row.userId}>
-                <td className="px-3 py-2 font-medium">{row.userName}</td>
+                <td className="px-3 py-2">
+                  <div className="flex items-center gap-2 font-medium">
+                    <UserAvatar name={row.userName} avatarUrl={row.avatarUrl} size="sm" />
+                    <span>{row.userName}</span>
+                  </div>
+                </td>
                 <td className="px-3 py-2">
                   <input
                     type="number"

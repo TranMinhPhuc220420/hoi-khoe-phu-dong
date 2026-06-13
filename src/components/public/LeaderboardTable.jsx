@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { UserAvatar } from '../shared/UserAvatar.jsx'
 import { Table, TableHead, TableBody, TableHeaderCell, TableCell } from '../ui/Table.jsx'
 
 const MEDALS = ['🥇', '🥈', '🥉']
@@ -39,7 +40,12 @@ export function LeaderboardTable({ users, limit, compact = false, showLink = fal
                 <TableCell className="font-semibold">
                   {index < 3 ? MEDALS[index] : index + 1}
                 </TableCell>
-                <TableCell>{user.name}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <UserAvatar user={user} size="md" />
+                    <span>{user.name}</span>
+                  </div>
+                </TableCell>
                 <TableCell className="font-bold">{user.totalPoints} điểm</TableCell>
               </tr>
             ))}
@@ -60,6 +66,7 @@ export function LeaderboardTable({ users, limit, compact = false, showLink = fal
               <span className="w-6 text-center font-semibold">
                 {index < 3 ? MEDALS[index] : index + 1}
               </span>
+              <UserAvatar user={user} size="md" />
               <span className="font-medium text-primary">{user.name}</span>
             </div>
             <span className="font-bold text-primary">{user.totalPoints} điểm</span>

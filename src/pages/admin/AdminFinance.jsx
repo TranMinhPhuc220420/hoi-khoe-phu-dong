@@ -6,6 +6,7 @@ import { PageLoading, PageError } from '../../components/public/PageStatus.jsx'
 import { PaymentFormModal } from '../../components/admin/PaymentFormModal.jsx'
 import { AdminTransactionLog } from '../../components/admin/AdminTransactionLog.jsx'
 import { MemberTransactionModal } from '../../components/shared/MemberTransactionModal.jsx'
+import { UserAvatar } from '../../components/shared/UserAvatar.jsx'
 import { useToast } from '../../hooks/useToast.js'
 import { formatCurrency } from '../../utils/format.js'
 import {
@@ -173,7 +174,12 @@ export function AdminFinance() {
                   key={user.id}
                   className={user.debt === maxDebt && maxDebt > 0 ? 'bg-red-50/60' : undefined}
                 >
-                  <td className="px-4 py-3 font-medium text-primary">{user.name}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2 font-medium text-primary">
+                      <UserAvatar user={user} size="sm" />
+                      <span>{user.name}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-3">{formatCurrency(user.totalPenalty)}</td>
                   <td className="px-4 py-3">{formatCurrency(user.paidAmount)}</td>
                   <td className="px-4 py-3 font-semibold">

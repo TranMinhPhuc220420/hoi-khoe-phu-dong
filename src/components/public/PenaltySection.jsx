@@ -7,6 +7,7 @@ import {
 } from '../../utils/finance.js'
 import { StatCard } from './StatCard.jsx'
 import { Button } from '../ui/Button.jsx'
+import { UserAvatar } from '../shared/UserAvatar.jsx'
 
 /**
  * @param {{ users: import('../../types/index.js').User[] }} props
@@ -189,6 +190,7 @@ export function MemberPenaltyTable({ users, showProgress = false, onViewDetails,
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
+                      <UserAvatar user={user} size="md" />
                       <span className="font-medium text-primary">{user.name}</span>
                       <MemberPaymentStatusBadge user={user} />
                     </div>
@@ -232,7 +234,10 @@ export function MemberPenaltyTable({ users, showProgress = false, onViewDetails,
             }`}
           >
             <div className="flex items-center justify-between gap-2">
-              <p className="font-semibold text-primary">{user.name}</p>
+              <div className="flex items-center gap-2">
+                <UserAvatar user={user} size="md" />
+                <p className="font-semibold text-primary">{user.name}</p>
+              </div>
               <MemberPaymentStatusBadge user={user} />
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
@@ -309,7 +314,16 @@ export function TransactionLog({ transactions, usersById, emptyMessage = 'Chưa 
               <td className="px-4 py-3 text-secondary">
                 {tx.createdAt ? formatTransactionDate(tx.createdAt) : '—'}
               </td>
-              <td className="px-4 py-3">{usersById[tx.userId]?.name ?? tx.userId}</td>
+              <td className="px-4 py-3">
+                {usersById[tx.userId] ? (
+                  <div className="flex items-center gap-2">
+                    <UserAvatar user={usersById[tx.userId]} size="sm" />
+                    <span>{usersById[tx.userId].name}</span>
+                  </div>
+                ) : (
+                  tx.userId
+                )}
+              </td>
               <td className="px-4 py-3">
                 <span
                   className={`rounded-sm px-2 py-0.5 text-xs font-semibold ${

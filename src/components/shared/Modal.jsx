@@ -1,7 +1,7 @@
 /**
  * @param {{
  *   open: boolean
- *   title: string
+ *   title: import('react').ReactNode
  *   children: import('react').ReactNode
  *   onClose: () => void
  *   footer?: import('react').ReactNode
