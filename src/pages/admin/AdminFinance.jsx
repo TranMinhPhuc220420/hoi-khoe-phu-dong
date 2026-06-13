@@ -120,14 +120,29 @@ export function AdminFinance() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Tổng phạt" value={formatCurrency(summary.totalPenalty)} />
-        <StatCard title="Đã thu" value={formatCurrency(summary.totalPaid)} />
         <StatCard
-          title="Còn nợ"
+          title="Tổng phạt"
+          value={formatCurrency(summary.totalPenalty)}
+          description="Tổng số tiền phạt từ các thành viên"
+          highlight={summary.totalPenalty > 0 ? 'gold' : 'none'}
+        />
+        <StatCard
+          title="Đã thu"
+          value={formatCurrency(summary.totalPaid)}
+          description="Tổng số tiền đã thu từ các thành viên"
+          highlight={summary.totalPaid > 0 ? 'gold' : 'none'}
+        />
+        <StatCard
+          title="Tổng nợ"
           value={formatCurrency(summary.totalDebt)}
+          description="Tổng nợ các thành viên"
           highlight={summary.totalDebt > 0 ? 'red' : 'none'}
         />
-        <StatCard title="Dư trả trước" value={formatCurrency(summary.totalCredit)} />
+        <StatCard
+          title="Dư trả trước"
+          value={formatCurrency(summary.totalCredit)}
+          description="Cộng số dư của thành viên đóng dư"
+        />
       </div>
 
       <Card title="Công nợ thành viên">

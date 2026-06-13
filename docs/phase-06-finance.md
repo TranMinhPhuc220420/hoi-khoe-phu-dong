@@ -143,7 +143,7 @@ if (penaltyAmount > 0) {
 | Rule | Detail |
 | ---- | ------ |
 | Payment vượt nợ | Cảnh báo + **xác nhận 2 bước**; vẫn ghi full amount (trả trước / làm tròn) |
-| Hiển thị dư | `credit = max(0, paidAmount - totalPenalty)`; không hiển thị nợ âm |
+| Hiển thị dư | Per member: `credit = max(0, paidAmount - totalPenalty)`; summary **Tổng nợ** = cộng nợ từng người (không trừ dư); **Dư trả trước** = cộng dư từng người đóng dư |
 | Bù trừ tự động | Khi phạt mới, balance tăng → credit giảm dần (scoring không đổi) |
 | Sửa/xóa transaction? | MVP: không cho sửa; admin tạo payment bù trừ với note |
 | Manual penalty adjustment? | Optional admin action "Điều chỉnh phạt" ngoài auto — Phase 6+ nếu cần |

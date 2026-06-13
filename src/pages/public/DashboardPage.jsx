@@ -6,8 +6,10 @@ import { PenaltySummaryCards, TransactionLog } from '../../components/public/Pen
 import { FinanceStatusSummary } from '../../components/public/FinanceStatusSummary.jsx'
 import { MemberFinanceGrid } from '../../components/public/MemberFinanceGrid.jsx'
 import { PageLoading, PageError } from '../../components/public/PageStatus.jsx'
+import { PaymentQrFloat } from '../../components/public/PaymentQrFloat.jsx'
 import { isConfigValid } from '../../services/firebase.js'
 import { useUsers, useTransactions } from '../../hooks/usePublicData.js'
+import { getMemberDebt } from '../../utils/finance.js'
 
 const firebaseConfigured = isConfigValid()
 
@@ -44,14 +46,19 @@ export function DashboardPage() {
     }
   }
 
+  const showPaymentQr = useMemo(
+    () => !loading && !error && users.some((u) => getMemberDebt(u) > 0),
+    [loading, error, users],
+  )
+
   return (
     <div className="space-y-8">
-      <div>
+      {/* <div>
         <h1 className="text-2xl font-bold text-primary">Quỹ phạt</h1>
         <p className="mt-1 text-secondary">
           Theo dõi số tiền đã đóng và còn nợ của từng thành viên
         </p>
-      </div>
+      </div> */}
 
       {!firebaseConfigured && (
         <EmptyState
@@ -73,7 +80,7 @@ export function DashboardPage() {
 
       {!loading && !error && users.length > 0 && (
         <>
-          <PenaltySummaryCards users={users} />
+          {/* <PenaltySummaryCards users={users} /> */}
 
           <FinanceStatusSummary users={users} />
 
@@ -97,6 +104,8 @@ export function DashboardPage() {
         typeFilter="all"
         onClose={() => setDetailUser(null)}
       />
+
+      <PaymentQrFloat visible={showPaymentQr} />
     </div>
   )
 }

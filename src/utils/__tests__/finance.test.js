@@ -45,7 +45,7 @@ describe('getMemberCredit', () => {
 })
 
 describe('aggregateFinance', () => {
-  it('sums debt and credit per member without netting', () => {
+  it('sums gross debt and gross credit per member independently', () => {
     const result = aggregateFinance([
       user(20_000, 5_000),
       user(10_000, 15_000),
@@ -58,5 +58,16 @@ describe('aggregateFinance', () => {
       totalDebt: 15_000,
       totalCredit: 5_000,
     })
+  })
+
+  it('keeps member credit separate from other members debt', () => {
+    const result = aggregateFinance([
+      user(50_000, 10_000),
+      user(30_000, 10_000),
+      user(20_000, 30_000),
+    ])
+
+    expect(result.totalDebt).toBe(60_000)
+    expect(result.totalCredit).toBe(10_000)
   })
 })

@@ -16,10 +16,29 @@ export function PenaltySummaryCards({ users }) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <StatCard title="Tổng quỹ phạt" value={formatCurrency(totalPenalty)} />
-      <StatCard title="Đã thu" value={formatCurrency(totalPaid)} />
-      <StatCard title="Còn nợ" value={formatCurrency(totalDebt)} highlight={totalDebt > 0 ? 'red' : 'none'} />
-      <StatCard title="Dư trả trước" value={formatCurrency(totalCredit)} />
+      <StatCard
+        title="Tổng quỹ phạt"
+        value={formatCurrency(totalPenalty)}
+        description="Tổng số tiền phạt từ các thành viên"
+        highlight={totalPenalty > 0 ? 'gold' : 'none'}
+      />
+      <StatCard
+        title="Đã thu"
+        value={formatCurrency(totalPaid)}
+        description="Tổng số tiền đã thu từ các thành viên"
+        highlight={totalPaid > 0 ? 'gold' : 'none'}
+      />
+      <StatCard
+        title="Tổng nợ"
+        value={formatCurrency(totalDebt)}
+        description="Tổng nợ các thành viên"
+        highlight={totalDebt > 0 ? 'red' : 'none'}
+      />
+      <StatCard
+        title="Dư trả trước"
+        value={formatCurrency(totalCredit)}
+        description="Cộng số dư của thành viên đóng dư"
+      />
     </div>
   )
 }
