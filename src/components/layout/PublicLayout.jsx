@@ -101,7 +101,7 @@ export function PublicLayout() {
       </main>
 
       <footer className="border-t border-secondary/20 py-6 text-center text-sm text-secondary">
-      Hội Khỏe Phú Đổng — Quỹ phạt & Dự đoán WC 2026
+        Hội Khỏe Phú Đổng - Dự án chỉ mang tính chất tham khảo và không có tính chính thức
       </footer>
     </div>
   )

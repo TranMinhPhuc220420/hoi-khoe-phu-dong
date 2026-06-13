@@ -2,11 +2,11 @@ import { NavLink } from 'react-router-dom'
 
 const navItems = [
   { to: '/admin/dashboard', label: 'Dashboard', end: true },
+  { to: '/admin/finance', label: 'Tài chính' },
   { to: '/admin/matches', label: 'Trận đấu' },
+  { to: '/admin/predictions', label: 'Dự đoán' },
   { to: '/admin/teams', label: 'Đội bóng' },
   { to: '/admin/users', label: 'Thành viên' },
-  { to: '/admin/predictions', label: 'Dự đoán' },
-  { to: '/admin/finance', label: 'Tài chính' },
 ]
 
 /**
@@ -31,7 +31,7 @@ export function AdminSidebar({ onLogout, sidebarOpen, onCloseSidebar, loggingOut
       >
         <div className="border-b border-secondary/20 px-6 py-5">
           <p className="text-lg font-bold text-primary">Admin</p>
-          <p className="text-xs text-secondary">WC 2026</p>
+          <p className="text-xs text-secondary">Hội Khỏe Phú Đổng</p>
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 p-4">
