@@ -1,22 +1,31 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 
 const navItems = [
-  { to: '/', label: 'Dashboard', end: true },
-  { to: '/matches', label: 'Lịch thi đấu' },
-  { to: '/leaderboard', label: 'Bảng xếp hạng' },
-  { to: '/penalty', label: 'Quỹ phạt' },
+  { to: '/', label: 'Trang chủ', end: true },
+  { to: '/matches', label: 'Thi đấu', end: false, matchPaths: ['/matches', '/leaderboard'] },
 ]
+
+function isNavItemActive(pathname, item) {
+  if (item.matchPaths) {
+    return item.matchPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+  }
+  if (item.end) {
+    return pathname === item.to
+  }
+  return pathname === item.to || pathname.startsWith(`${item.to}/`)
+}
 
 export function PublicLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { pathname } = useLocation()
 
   return (
     <div className="min-h-svh bg-neutral">
       <header className="border-b border-secondary/20 bg-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <NavLink to="/" className="text-xl font-bold text-primary" onClick={() => setMenuOpen(false)}>
-            WC 2026
+            Hội Khỏe Phú Đổng
           </NavLink>
 
           <button
@@ -35,22 +44,23 @@ export function PublicLayout() {
           </button>
 
           <nav className="hidden flex-wrap gap-1 sm:flex">
-            {navItems.map(({ to, label, end }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={end}
-                className={({ isActive }) =>
-                  `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
-                    isActive
+            {navItems.map((item) => {
+              const active = isNavItemActive(pathname, item)
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  className={`rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
+                    active
                       ? 'bg-primary text-on-primary'
                       : 'text-secondary hover:bg-neutral hover:text-primary'
-                  }`
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
+                  }`}
+                >
+                  {item.label}
+                </NavLink>
+              )
+            })}
           </nav>
         </div>
 
@@ -64,21 +74,22 @@ export function PublicLayout() {
             />
             <nav className="relative z-50 border-t border-secondary/20 bg-surface px-4 py-3 sm:hidden">
               <div className="flex flex-col gap-1">
-                {navItems.map(({ to, label, end }) => (
+                {navItems.map((item) => {
+                  const active = isNavItemActive(pathname, item)
+                  return (
                   <NavLink
-                    key={to}
-                    to={to}
-                    end={end}
+                    key={item.to}
+                    to={item.to}
+                    end={item.end}
                     onClick={() => setMenuOpen(false)}
-                    className={({ isActive }) =>
-                      `rounded-md px-3 py-2.5 text-sm font-semibold ${
-                        isActive ? 'bg-primary text-on-primary' : 'text-secondary hover:bg-neutral'
-                      }`
-                    }
+                    className={`rounded-md px-3 py-2.5 text-sm font-semibold ${
+                      active ? 'bg-primary text-on-primary' : 'text-secondary hover:bg-neutral'
+                    }`}
                   >
-                    {label}
+                    {item.label}
                   </NavLink>
-                ))}
+                  )
+                })}
               </div>
             </nav>
           </>
@@ -90,7 +101,7 @@ export function PublicLayout() {
       </main>
 
       <footer className="border-t border-secondary/20 py-6 text-center text-sm text-secondary">
-      Hội Khỏe Phú Đổng — World Cup 2026
+      Hội Khỏe Phú Đổng — Quỹ phạt & Dự đoán WC 2026
       </footer>
     </div>
   )

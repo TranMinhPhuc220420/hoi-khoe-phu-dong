@@ -1,5 +1,6 @@
 import { Card } from '../../components/ui/Card.jsx'
 import { EmptyState } from '../../components/shared/EmptyState.jsx'
+import { CompetitionSubNav } from '../../components/public/CompetitionSubNav.jsx'
 import { LeaderboardTable } from '../../components/public/LeaderboardTable.jsx'
 import { PageLoading, PageError } from '../../components/public/PageStatus.jsx'
 import { isConfigValid } from '../../services/firebase.js'
@@ -18,9 +19,11 @@ export function LeaderboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-primary">Bảng xếp hạng</h1>
-        <p className="mt-1 text-secondary">Điểm số dự đoán của 10 thành viên</p>
+        <h1 className="text-2xl font-bold text-primary">Thi đấu</h1>
+        <p className="mt-1 text-secondary">Bảng xếp hạng điểm dự đoán</p>
       </div>
+
+      <CompetitionSubNav />
 
       {!firebaseConfigured && (
         <EmptyState title="Firebase chưa được cấu hình" description="Thêm VITE_FIREBASE_* vào .env.local." />
@@ -41,7 +44,7 @@ export function LeaderboardPage() {
         <>
           <Card>
             <p className="text-sm text-secondary">
-              Điểm trung bình: <span className="font-bold text-primary">{avgPoints}</span>
+              Điểm trung bình: <span className="font-bold text-primary">{avgPoints} điểm</span>
             </p>
           </Card>
           <LeaderboardTable users={users} />

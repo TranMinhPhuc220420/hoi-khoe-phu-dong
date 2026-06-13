@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CompetitionSubNav } from '../../components/public/CompetitionSubNav.jsx'
 import { EmptyState } from '../../components/shared/EmptyState.jsx'
 import { MatchesTable } from '../../components/public/MatchesTable.jsx'
 import { PageLoading, PageError } from '../../components/public/PageStatus.jsx'
@@ -22,9 +23,11 @@ export function MatchesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-primary">Lịch thi đấu</h1>
-        <p className="mt-1 text-secondary">Xem lịch thi đấu và dự đoán của các thành viên</p>
+        <h1 className="text-2xl font-bold text-primary">Thi đấu</h1>
+        <p className="mt-1 text-secondary">Lịch thi đấu và dự đoán World Cup 2026</p>
       </div>
+
+      <CompetitionSubNav />
 
       {!firebaseConfigured && (
         <EmptyState title="Firebase chưa được cấu hình" description="Thêm VITE_FIREBASE_* vào .env.local." />

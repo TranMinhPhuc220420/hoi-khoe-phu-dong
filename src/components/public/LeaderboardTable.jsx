@@ -34,13 +34,13 @@ export function LeaderboardTable({ users, limit, compact = false, showLink = fal
             {rows.map((user, index) => (
               <tr
                 key={user.id}
-                className={index === 0 && !compact ? 'bg-amber-50/60' : undefined}
+                className={index === 0 && !compact ? 'bg-neutral/80' : undefined}
               >
                 <TableCell className="font-semibold">
                   {index < 3 ? MEDALS[index] : index + 1}
                 </TableCell>
                 <TableCell>{user.name}</TableCell>
-                <TableCell className="font-bold">{user.totalPoints}</TableCell>
+                <TableCell className="font-bold">{user.totalPoints} điểm</TableCell>
               </tr>
             ))}
           </TableBody>
@@ -53,7 +53,7 @@ export function LeaderboardTable({ users, limit, compact = false, showLink = fal
           <div
             key={user.id}
             className={`flex items-center justify-between rounded-lg border border-secondary/20 bg-surface px-4 py-3 ${
-              index === 0 && !compact ? 'bg-amber-50/60' : ''
+              index === 0 && !compact ? 'bg-neutral/80' : ''
             }`}
           >
             <div className="flex items-center gap-3">
@@ -62,7 +62,7 @@ export function LeaderboardTable({ users, limit, compact = false, showLink = fal
               </span>
               <span className="font-medium text-primary">{user.name}</span>
             </div>
-            <span className="font-bold text-primary">{user.totalPoints}</span>
+            <span className="font-bold text-primary">{user.totalPoints} điểm</span>
           </div>
         ))}
       </div>

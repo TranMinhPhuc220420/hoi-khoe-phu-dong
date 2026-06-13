@@ -1,4 +1,4 @@
-import { Modal } from '../admin/Modal.jsx'
+import { Modal } from './Modal.jsx'
 import { TransactionLog } from '../public/PenaltySection.jsx'
 import { formatCurrency } from '../../utils/format.js'
 import { filterTransactions } from '../../utils/exportCsv.js'
@@ -47,7 +47,7 @@ export function MemberTransactionModal({
         </div>
         <div>
           <p className="text-secondary">{credit > 0 ? 'Dư trả trước' : 'Còn nợ'}</p>
-          <p className={`font-semibold ${credit > 0 ? 'text-green-700' : 'text-primary'}`}>
+          <p className={`font-semibold ${credit > 0 ? 'text-tertiary' : 'text-primary'}`}>
             {credit > 0 ? formatCurrency(credit) : formatCurrency(debt)}
           </p>
         </div>
@@ -63,7 +63,7 @@ export function MemberTransactionModal({
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-neutral">
             <div
-              className="h-full rounded-full bg-primary transition-all"
+              className="h-full rounded-full bg-tertiary transition-all"
               style={{
                 width: `${Math.min(100, (user.paidAmount / user.totalPenalty) * 100)}%`,
               }}

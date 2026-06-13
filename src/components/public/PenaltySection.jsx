@@ -27,7 +27,7 @@ export function PenaltySummaryCards({ users }) {
 /**
  * @param {import('../../types/index.js').User} user
  */
-function PaymentProgress({ user }) {
+export function PaymentProgress({ user }) {
   if (user.totalPenalty <= 0) return null
 
   const pct = Math.min(100, (user.paidAmount / user.totalPenalty) * 100)
@@ -42,7 +42,7 @@ function PaymentProgress({ user }) {
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-neutral">
         <div
-          className="h-full rounded-full bg-primary transition-all"
+          className="h-full rounded-full bg-tertiary transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -53,13 +53,14 @@ function PaymentProgress({ user }) {
 /**
  * @param {{ user: import('../../types/index.js').User & { balance?: number, debt?: number, credit?: number } }} props
  */
-function MemberPaymentStatusBadge({ user }) {
+export function MemberPaymentStatusBadge({ user }) {
   const credit = user.credit ?? getMemberCredit(user)
   const balance = user.balance ?? getMemberBalance(user)
+  const debt = user.debt ?? getMemberDebt(user)
 
   if (credit > 0) {
     return (
-      <span className="rounded-sm bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-700">
+      <span className="rounded-sm bg-neutral px-2 py-0.5 text-xs font-semibold text-tertiary">
         Dư {formatCurrency(credit)}
       </span>
     )
@@ -67,8 +68,24 @@ function MemberPaymentStatusBadge({ user }) {
 
   if (balance === 0 && user.totalPenalty > 0) {
     return (
-      <span className="rounded-sm bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-700">
+      <span className="rounded-sm bg-neutral px-2 py-0.5 text-xs font-semibold text-primary">
         Đã xong
+      </span>
+    )
+  }
+
+  if (debt > 0) {
+    return (
+      <span className="rounded-sm border border-secondary/30 px-2 py-0.5 text-xs font-semibold text-primary">
+        Còn nợ
+      </span>
+    )
+  }
+
+  if (user.totalPenalty <= 0) {
+    return (
+      <span className="rounded-sm px-2 py-0.5 text-xs font-semibold text-secondary">
+        Chưa có phạt
       </span>
     )
   }
@@ -84,7 +101,7 @@ function MemberBalanceCell({ user }) {
   const credit = user.credit ?? getMemberCredit(user)
 
   if (credit > 0) {
-    return <span className="font-semibold text-green-700">Dư {formatCurrency(credit)}</span>
+    return <span className="font-semibold text-tertiary">Dư {formatCurrency(credit)}</span>
   }
 
   return <span className="font-semibold">{formatCurrency(debt)}</span>
@@ -94,10 +111,11 @@ function MemberBalanceCell({ user }) {
  * @param {{
  *   users: import('../../types/index.js').User[]
  *   showProgress?: boolean
- *   onViewPenaltyDetails?: (user: import('../../types/index.js').User) => void
+ *   onViewDetails?: (user: import('../../types/index.js').User) => void
  * }} props
  */
-export function MemberPenaltyTable({ users, showProgress = false, onViewPenaltyDetails }) {
+export function MemberPenaltyTable({ users, showProgress = false, onViewDetails, onViewPenaltyDetails }) {
+  const handleViewDetails = onViewDetails ?? onViewPenaltyDetails
   const rows = [...users]
     .map((u) => ({
       ...u,
@@ -137,7 +155,7 @@ export function MemberPenaltyTable({ users, showProgress = false, onViewPenaltyD
                     Tiến độ
                   </th>
                 )}
-                {onViewPenaltyDetails && (
+                {handleViewDetails && (
                   <th className="px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-wide text-secondary">
                     Chi tiết
                   </th>
@@ -166,15 +184,15 @@ export function MemberPenaltyTable({ users, showProgress = false, onViewPenaltyD
                       <PaymentProgress user={user} />
                     </td>
                   )}
-                  {onViewPenaltyDetails && (
+                  {handleViewDetails && (
                     <td className="px-4 py-3">
                       {user.totalPenalty > 0 && (
                         <button
                           type="button"
-                          onClick={() => onViewPenaltyDetails(user)}
+                          onClick={() => handleViewDetails(user)}
                           className="text-sm font-semibold text-tertiary hover:underline"
                         >
-                          Xem chi tiết phạt
+                          Xem lịch sử
                         </button>
                       )}
                     </td>
@@ -215,14 +233,14 @@ export function MemberPenaltyTable({ users, showProgress = false, onViewPenaltyD
               </div>
             </div>
             {showProgress && <PaymentProgress user={user} />}
-            {onViewPenaltyDetails && user.totalPenalty > 0 && (
+            {handleViewDetails && user.totalPenalty > 0 && (
               <Button
                 variant="secondary"
                 size="sm"
                 className="mt-3"
-                onClick={() => onViewPenaltyDetails(user)}
+                onClick={() => handleViewDetails(user)}
               >
-                Xem chi tiết phạt
+                Xem lịch sử
               </Button>
             )}
           </div>
@@ -276,7 +294,9 @@ export function TransactionLog({ transactions, usersById, emptyMessage = 'Chưa 
               <td className="px-4 py-3">
                 <span
                   className={`rounded-sm px-2 py-0.5 text-xs font-semibold ${
-                    tx.type === 'penalty' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
+                    tx.type === 'penalty'
+                      ? 'border border-secondary/30 text-primary'
+                      : 'bg-neutral text-tertiary'
                   }`}
                 >
                   {tx.type === 'penalty' ? 'Phạt' : 'Thanh toán'}

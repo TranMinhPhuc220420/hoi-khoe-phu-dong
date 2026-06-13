@@ -11,8 +11,8 @@ import { Card } from '../ui/Card.jsx'
  */
 export function StatCard({ title, value, description, highlight = 'none', className = '' }) {
   const highlightClass = {
-    gold: 'ring-2 ring-amber-300 bg-amber-50/50',
-    red: 'ring-2 ring-red-200 bg-red-50/50',
+    gold: 'border border-secondary/30 bg-neutral',
+    red: 'border border-secondary/40 bg-neutral',
     none: '',
   }[highlight]
 

@@ -6,7 +6,6 @@ import { AdminLayout } from './components/layout/AdminLayout.jsx'
 import { DashboardPage } from './pages/public/DashboardPage.jsx'
 import { MatchesPage } from './pages/public/MatchesPage.jsx'
 import { LeaderboardPage } from './pages/public/LeaderboardPage.jsx'
-import { PenaltyPage } from './pages/public/PenaltyPage.jsx'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage.jsx'
 import { AdminDashboard } from './pages/admin/AdminDashboard.jsx'
 import { AdminMatches } from './pages/admin/AdminMatches.jsx'
@@ -23,7 +22,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="matches" element={<MatchesPage />} />
           <Route path="leaderboard" element={<LeaderboardPage />} />
-          <Route path="penalty" element={<PenaltyPage />} />
+          <Route path="penalty" element={<Navigate to="/" replace />} />
         </Route>
 
         <Route path="admin/login" element={<AdminLoginPage />} />
