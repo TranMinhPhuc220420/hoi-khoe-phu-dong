@@ -99,6 +99,7 @@ export function MatchesTable({ matches, users, teamsById = {}, stageFilter, show
                       <PredictionMatrix
                         matchId={match.id}
                         usersById={usersById}
+                        isFinished={match.isFinished}
                         isExpanded
                       />
                     </td>
@@ -136,6 +137,7 @@ export function MatchesTable({ matches, users, teamsById = {}, stageFilter, show
             <PredictionMatrix
               matchId={match.id}
               usersById={usersById}
+              isFinished={match.isFinished}
               isExpanded={expandedId === match.id}
             />
           </div>

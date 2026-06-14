@@ -34,6 +34,7 @@
  * @property {number | null} homeScore
  * @property {number | null} awayScore
  * @property {boolean} isFinished
+ * @property {string[]} [nonParticipatingUserIds]
  */
 
 /**

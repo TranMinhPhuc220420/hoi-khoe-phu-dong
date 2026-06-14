@@ -41,6 +41,9 @@ vi.mock('../transactions.service.js', () => ({
   create: vi.fn(async (tx) => {
     state.transactions.push({ ...tx, id: `tx-${state.transactions.length + 1}` })
   }),
+  getByMatchId: vi.fn(async (matchId) =>
+    state.transactions.filter((tx) => tx.matchId === matchId),
+  ),
   deleteByMatchId: vi.fn(async (matchId) => {
     state.transactions = state.transactions.filter((tx) => tx.matchId !== matchId)
   }),
@@ -197,7 +200,7 @@ describe('scoring.service — recalculateMatch', () => {
     expect(state.transactions).toHaveLength(1)
   })
 
-  it('D-04 only scores users with predictions', async () => {
+  it('D-04 penalizes users without predictions', async () => {
     state.match = createMatch()
     state.users.set('u1', createUser('u1'))
     state.users.set('u2', createUser('u2'))
@@ -210,7 +213,45 @@ describe('scoring.service — recalculateMatch', () => {
 
     expect(state.users.get('u1')?.totalPoints).toBe(5)
     expect(state.users.get('u2')?.totalPoints).toBe(0)
-    expect(state.users.get('u2')?.totalPenalty).toBe(0)
+    expect(state.users.get('u2')?.totalPenalty).toBe(10_000)
+    expect(state.transactions).toHaveLength(1)
+    expect(state.transactions[0]).toMatchObject({
+      userId: 'u2',
+      amount: 10_000,
+      type: 'penalty',
+      note: expect.stringContaining('Không dự đoán'),
+    })
+  })
+
+  it('D-04b recalculating absent penalty does not double-count', async () => {
+    state.match = createMatch()
+    state.users.set('u1', createUser('u1'))
+    state.users.set('u2', createUser('u2'))
+    state.predictions.set(
+      'p1',
+      createPrediction('p1', 'u1', { predictedHome: 3, predictedAway: 1 }),
+    )
+
+    await recalculateMatch(MATCH_ID)
+    await recalculateMatch(MATCH_ID)
+
+    expect(state.users.get('u2')?.totalPenalty).toBe(10_000)
+    expect(state.transactions.filter((tx) => tx.userId === 'u2')).toHaveLength(1)
+  })
+
+  it('D-04c applies stage penalty for absent user on quarter match', async () => {
+    state.match = createMatch({ stage: 'quarter', homeScore: 2, awayScore: 1 })
+    state.users.set('u-absent', createUser('u-absent'))
+
+    await recalculateMatch(MATCH_ID)
+
+    expect(state.users.get('u-absent')?.totalPenalty).toBe(25_000)
+    expect(state.transactions).toHaveLength(1)
+    expect(state.transactions[0]).toMatchObject({
+      userId: 'u-absent',
+      amount: 25_000,
+      note: expect.stringContaining('Không dự đoán'),
+    })
   })
 
   it('D-05 scores multiple users independently on same match', async () => {
@@ -248,6 +289,69 @@ describe('scoring.service — recalculateMatch', () => {
       totalPenalty: 25_000,
     })
     expect(state.transactions).toHaveLength(2)
+  })
+
+  it('D-05b penalizes absent users alongside predicted users', async () => {
+    state.match = createMatch({ stage: 'quarter', homeScore: 2, awayScore: 1 })
+    state.users.set('u-exact', createUser('u-exact'))
+    state.users.set('u-absent', createUser('u-absent'))
+    state.predictions.set(
+      'p-exact',
+      createPrediction('p-exact', 'u-exact', { predictedHome: 2, predictedAway: 1 }),
+    )
+
+    await recalculateMatch(MATCH_ID)
+
+    expect(state.users.get('u-exact')).toMatchObject({ totalPoints: 5, totalPenalty: 0 })
+    expect(state.users.get('u-absent')).toMatchObject({ totalPoints: 0, totalPenalty: 25_000 })
+    expect(state.transactions).toHaveLength(1)
+  })
+
+  it('D-07 recalculates correctly after adding prediction post-absent penalty', async () => {
+    state.match = createMatch()
+    state.users.set('u-absent', createUser('u-absent'))
+
+    await recalculateMatch(MATCH_ID)
+
+    expect(state.users.get('u-absent')?.totalPenalty).toBe(10_000)
+    expect(state.transactions).toHaveLength(1)
+    expect(state.transactions[0].note).toContain('Không dự đoán')
+
+    state.predictions.set(
+      'p-late',
+      createPrediction('p-late', 'u-absent', { predictedHome: 3, predictedAway: 1 }),
+    )
+
+    await recalculateMatch(MATCH_ID)
+
+    expect(state.users.get('u-absent')?.totalPoints).toBe(3)
+    expect(state.users.get('u-absent')?.totalPenalty).toBe(10_000)
+    expect(state.transactions).toHaveLength(1)
+    expect(state.transactions[0]).toMatchObject({
+      userId: 'u-absent',
+      amount: 10_000,
+      type: 'penalty',
+    })
+    expect(state.transactions[0].note).not.toContain('Không dự đoán')
+  })
+
+  it('D-07b clears penalty when late prediction is exact score', async () => {
+    state.match = createMatch()
+    state.users.set('u-absent', createUser('u-absent'))
+
+    await recalculateMatch(MATCH_ID)
+    expect(state.users.get('u-absent')?.totalPenalty).toBe(10_000)
+
+    state.predictions.set(
+      'p-late',
+      createPrediction('p-late', 'u-absent', { predictedHome: 2, predictedAway: 1 }),
+    )
+
+    await recalculateMatch(MATCH_ID)
+
+    expect(state.users.get('u-absent')?.totalPoints).toBe(5)
+    expect(state.users.get('u-absent')?.totalPenalty).toBe(0)
+    expect(state.transactions).toHaveLength(0)
   })
 
   it('D-06 skips orphan prediction when user missing', async () => {

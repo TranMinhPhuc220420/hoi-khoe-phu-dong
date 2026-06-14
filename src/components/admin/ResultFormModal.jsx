@@ -7,11 +7,12 @@ import { Modal } from './Modal.jsx'
  * @param {{
  *   match: import('../../types/index.js').Match
  *   predictionCount: number
+ *   totalUsers: number
  *   onClose: () => void
  *   onSubmit: (homeScore: number, awayScore: number) => Promise<void>
  * }} props
  */
-function ResultFormFields({ match, predictionCount, onClose, onSubmit }) {
+function ResultFormFields({ match, predictionCount, totalUsers, onClose, onSubmit }) {
   const [homeScore, setHomeScore] = useState(String(match.homeScore ?? 0))
   const [awayScore, setAwayScore] = useState(String(match.awayScore ?? 0))
   const [submitting, setSubmitting] = useState(false)
@@ -40,6 +41,8 @@ function ResultFormFields({ match, predictionCount, onClose, onSubmit }) {
     }
   }
 
+  const absentCount = totalUsers - predictionCount
+
   return (
     <>
       <div className="space-y-4">
@@ -47,10 +50,11 @@ function ResultFormFields({ match, predictionCount, onClose, onSubmit }) {
           {match.homeTeam} vs {match.awayTeam}
         </p>
 
-        {predictionCount < 10 && (
+        {totalUsers > 0 && predictionCount < totalUsers && (
           <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            Cảnh báo: Chỉ có {predictionCount}/10 dự đoán. Hệ thống vẫn tính điểm cho các dự
-            đoán hiện có.
+            Cảnh báo: Chỉ có {predictionCount}/{totalUsers} dự đoán.{' '}
+            {absentCount} thành viên chưa dự đoán sẽ bị phạt theo mức vòng khi xác nhận kết
+            quả.
           </p>
         )}
 
@@ -100,11 +104,12 @@ function ResultFormFields({ match, predictionCount, onClose, onSubmit }) {
  *   open: boolean
  *   match: import('../../types/index.js').Match | null
  *   predictionCount: number
+ *   totalUsers: number
  *   onClose: () => void
  *   onSubmit: (homeScore: number, awayScore: number) => Promise<void>
  * }} props
  */
-export function ResultFormModal({ open, match, predictionCount, onClose, onSubmit }) {
+export function ResultFormModal({ open, match, predictionCount, totalUsers, onClose, onSubmit }) {
   if (!open || !match) return null
 
   return (
@@ -113,6 +118,7 @@ export function ResultFormModal({ open, match, predictionCount, onClose, onSubmi
         key={match.id}
         match={match}
         predictionCount={predictionCount}
+        totalUsers={totalUsers}
         onClose={onClose}
         onSubmit={onSubmit}
       />

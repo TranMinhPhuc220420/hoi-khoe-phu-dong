@@ -1,3 +1,5 @@
+import { formatAbsentPenaltyNote, isAbsentPenaltyNote } from '../constants/scoring.js'
+import { getPenaltyByStage } from '../constants/penalty-rates.js'
 import { calculateBasePoints, calculateScore } from '../utils/score.js'
 import { calculatePenalty } from '../utils/penalty.js'
 import { countStarsUsed } from '../utils/star.js'
@@ -61,13 +63,39 @@ async function applyMatchScoring(match, predictions) {
       })
     }
   }
+
+  const allUsers = await usersService.getAll()
+  const predictedUserIds = new Set(predictions.map((p) => p.userId))
+
+  for (const user of allUsers) {
+    if (predictedUserIds.has(user.id)) continue
+
+    const penaltyAmount = getPenaltyByStage(match.stage)
+    if (penaltyAmount <= 0) continue
+
+    await usersService.updateTotals(user.id, {
+      totalPoints: user.totalPoints,
+      totalPenalty: user.totalPenalty + penaltyAmount,
+    })
+
+    await transactionsService.create({
+      userId: user.id,
+      amount: penaltyAmount,
+      type: 'penalty',
+      note: formatAbsentPenaltyNote(match.stage, match.homeTeam, match.awayTeam),
+      matchId: match.id,
+    })
+  }
 }
 
 /**
  * Reverse prior scoring for a match (idempotent recalc).
+ * @param {string} matchId
  * @param {import('../types/index.js').Prediction[]} predictions
  */
-async function reverseMatchScoring(predictions) {
+async function reverseMatchScoring(matchId, predictions) {
+  const predictedUserIds = new Set(predictions.map((p) => p.userId))
+
   for (const prediction of predictions) {
     const pointsEarned = prediction.pointsEarned ?? 0
     const penaltyAmount = prediction.penaltyAmount ?? 0
@@ -83,9 +111,23 @@ async function reverseMatchScoring(predictions) {
     })
   }
 
-  if (predictions.length > 0) {
-    await transactionsService.deleteByMatchId(predictions[0].matchId)
+  const transactions = await transactionsService.getByMatchId(matchId)
+  for (const tx of transactions) {
+    if (tx.type !== 'penalty') continue
+
+    const isAbsentTx = isAbsentPenaltyNote(tx.note)
+    if (predictedUserIds.has(tx.userId) && !isAbsentTx) continue
+
+    const user = await usersService.getById(tx.userId)
+    if (!user) continue
+
+    await usersService.updateTotals(tx.userId, {
+      totalPoints: user.totalPoints,
+      totalPenalty: user.totalPenalty - tx.amount,
+    })
   }
+
+  await transactionsService.deleteByMatchId(matchId)
 }
 
 /**
@@ -102,7 +144,7 @@ export async function recalculateMatch(matchId) {
 
   const predictions = await predictionsService.getByMatch(matchId)
 
-  await reverseMatchScoring(predictions)
+  await reverseMatchScoring(matchId, predictions)
   await applyMatchScoring(match, predictions)
 }
 

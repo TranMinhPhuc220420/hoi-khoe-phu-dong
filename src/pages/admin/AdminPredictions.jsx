@@ -8,6 +8,8 @@ import { STAGE_LABELS } from '../../constants/stages.js'
 import * as matchesService from '../../services/matches.service.js'
 import * as usersService from '../../services/users.service.js'
 import * as predictionsService from '../../services/predictions.service.js'
+import * as scoringService from '../../services/scoring.service.js'
+import { useDataStore } from '../../stores/data.store.js'
 
 export function AdminPredictions() {
   const toast = useToast()
@@ -103,15 +105,23 @@ export function AdminPredictions() {
   }
 
   const handleSave = async (rows) => {
-    if (!effectiveMatchId) return
+    if (!effectiveMatchId || !selectedMatch) return
     await predictionsService.upsertBatch(effectiveMatchId, rows)
-    toast.success('Đã lưu dự đoán')
-    const [preds, all] = await Promise.all([
+    if (selectedMatch.isFinished) {
+      await scoringService.recalculateMatch(effectiveMatchId)
+      useDataStore.getState().fetchUsers(true)
+      toast.success('Đã lưu và tính lại điểm/phạt')
+    } else {
+      toast.success('Đã lưu dự đoán')
+    }
+    const [preds, all, updatedMatches] = await Promise.all([
       predictionsService.getByMatch(effectiveMatchId),
       predictionsService.getAll(),
+      matchesService.getAll(),
     ])
     setMatchPredictions(preds)
     setAllPredictions(all)
+    setMatches(updatedMatches)
   }
 
   if (loading) return <PageLoading />
@@ -140,7 +150,7 @@ export function AdminPredictions() {
           description={STAGE_LABELS[selectedMatch.stage]}
         >
           <PredictionGrid
-            key={`${effectiveMatchId}-${matchPredictions.length}`}
+            key={`${effectiveMatchId}-${(selectedMatch.nonParticipatingUserIds ?? []).join(',')}-${matchPredictions.length}`}
             match={selectedMatch}
             users={users}
             existingPredictions={matchPredictions}

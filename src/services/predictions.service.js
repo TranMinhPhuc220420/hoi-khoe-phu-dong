@@ -10,6 +10,7 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore'
+import { isFilledPredictionRow } from '../utils/prediction-input.js'
 import { canUseStar } from '../utils/star.js'
 import { docsToArray, docToData, requireDb } from './firestore.helpers.js'
 import * as matchesService from './matches.service.js'
@@ -123,13 +124,25 @@ async function assertStarAllowed(userId, matchId, isStar, excludePredictionId) {
 
 /**
  * @param {string} matchId
- * @param {Array<{ userId: string, predictedHome: number, predictedAway: number, isStar: boolean, predictionId?: string }>} rows
+ * @param {Array<{ userId: string, hasParticipated?: boolean, predictedHome?: number | null, predictedAway?: number | null, isStar: boolean, predictionId?: string }>} rows
  */
 export async function upsertBatch(matchId, rows) {
   const existing = await getByMatch(matchId)
   const byUser = Object.fromEntries(existing.map((p) => [p.userId, p]))
+  const nonParticipatingUserIds = rows
+    .filter((row) => row.hasParticipated === false)
+    .map((row) => row.userId)
 
   for (const row of rows) {
+    const current = byUser[row.userId]
+
+    if (row.hasParticipated === false) {
+      if (current) await remove(current.id)
+      continue
+    }
+
+    if (!isFilledPredictionRow(row)) continue
+
     const payload = {
       matchId,
       userId: row.userId,
@@ -138,11 +151,12 @@ export async function upsertBatch(matchId, rows) {
       isStar: row.isStar,
     }
 
-    const current = byUser[row.userId]
     if (current) {
       await update(current.id, payload)
     } else {
       await create(payload)
     }
   }
+
+  await matchesService.update(matchId, { nonParticipatingUserIds })
 }

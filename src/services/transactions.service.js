@@ -68,6 +68,15 @@ export async function create(data) {
   return ref.id
 }
 
+/** @param {string} matchId @returns {Promise<import('../types/index.js').Transaction[]>} */
+export async function getByMatchId(matchId) {
+  const db = requireDb()
+  const snapshot = await getDocs(
+    query(collection(db, COLLECTION), where('matchId', '==', matchId)),
+  )
+  return docsToArray(snapshot)
+}
+
 /** @param {string} matchId @returns {Promise<void>} */
 export async function deleteByMatchId(matchId) {
   const db = requireDb()

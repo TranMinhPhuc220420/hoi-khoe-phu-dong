@@ -10,6 +10,7 @@ import { useToast } from '../../hooks/useToast.js'
 import { formatMatchDateTime, formatScore } from '../../utils/format.js'
 import * as matchesService from '../../services/matches.service.js'
 import * as predictionsService from '../../services/predictions.service.js'
+import * as usersService from '../../services/users.service.js'
 import { useDataStore } from '../../stores/data.store.js'
 import { Table, TableHead, TableBody, TableHeaderCell, TableCell } from '../../components/ui/Table.jsx'
 
@@ -24,6 +25,7 @@ export function AdminMatches() {
   const [editMatch, setEditMatch] = useState(/** @type {import('../../types/index.js').Match | null} */ (null))
   const [resultMatch, setResultMatch] = useState(/** @type {import('../../types/index.js').Match | null} */ (null))
   const [resultPredCount, setResultPredCount] = useState(0)
+  const [resultTotalUsers, setResultTotalUsers] = useState(0)
   const [deleteMatch, setDeleteMatch] = useState(/** @type {import('../../types/index.js').Match | null} */ (null))
   const [deleting, setDeleting] = useState(false)
   const [createActionSeen, setCreateActionSeen] = useState(false)
@@ -90,8 +92,12 @@ export function AdminMatches() {
   }
 
   const openResult = async (match) => {
-    const preds = await predictionsService.getByMatch(match.id)
+    const [preds, users] = await Promise.all([
+      predictionsService.getByMatch(match.id),
+      usersService.getAll(),
+    ])
     setResultPredCount(preds.length)
+    setResultTotalUsers(users.length)
     setResultMatch(match)
   }
 
@@ -204,6 +210,7 @@ export function AdminMatches() {
         open={Boolean(resultMatch)}
         match={resultMatch}
         predictionCount={resultPredCount}
+        totalUsers={resultTotalUsers}
         onClose={() => setResultMatch(null)}
         onSubmit={handleUpdateResult}
       />

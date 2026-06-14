@@ -1,16 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import * as predictionsService from '../../services/predictions.service.js'
 import { formatPrediction } from '../../utils/format.js'
 import { Spinner } from '../ui/Spinner.jsx'
 import { Table, TableHead, TableBody, TableHeaderCell, TableCell } from '../ui/Table.jsx'
 
 /**
+ * @param {Record<string, import('../../types/index.js').User>} usersById
+ */
+function sortUsers(usersById) {
+  return Object.values(usersById).sort((a, b) => {
+    const orderA = typeof a.sortOrder === 'number' ? a.sortOrder : Number.MAX_SAFE_INTEGER
+    const orderB = typeof b.sortOrder === 'number' ? b.sortOrder : Number.MAX_SAFE_INTEGER
+    if (orderA !== orderB) return orderA - orderB
+    return a.name.localeCompare(b.name, 'vi')
+  })
+}
+
+/**
  * @param {{
  *   matchId: string
  *   usersById: Record<string, import('../../types/index.js').User>
+ *   isFinished: boolean
  * }} props
  */
-function PredictionMatrixContent({ matchId, usersById }) {
+function PredictionMatrixContent({ matchId, usersById, isFinished }) {
   const [predictions, setPredictions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -25,6 +38,13 @@ function PredictionMatrixContent({ matchId, usersById }) {
       .finally(() => setLoading(false))
   }, [matchId])
 
+  const predictionsByUser = useMemo(
+    () => Object.fromEntries(predictions.map((p) => [p.userId, p])),
+    [predictions],
+  )
+
+  const sortedUsers = useMemo(() => sortUsers(usersById), [usersById])
+
   if (loading) {
     return (
       <div className="flex justify-center py-6">
@@ -37,20 +57,21 @@ function PredictionMatrixContent({ matchId, usersById }) {
     return <p className="py-4 text-sm text-red-600">{error}</p>
   }
 
-  if (!predictions.length) {
+  if (!isFinished && predictions.length === 0) {
     return <p className="py-4 text-sm text-secondary">Chưa có dự đoán cho trận này.</p>
   }
 
-  const sorted = [...predictions].sort((a, b) => {
-    const userA = usersById[a.userId]
-    const userB = usersById[b.userId]
-    const orderA = typeof userA?.sortOrder === 'number' ? userA.sortOrder : Number.MAX_SAFE_INTEGER
-    const orderB = typeof userB?.sortOrder === 'number' ? userB.sortOrder : Number.MAX_SAFE_INTEGER
-    if (orderA !== orderB) return orderA - orderB
-    const nameA = userA?.name ?? ''
-    const nameB = userB?.name ?? ''
-    return nameA.localeCompare(nameB, 'vi')
-  })
+  if (isFinished && sortedUsers.length === 0 && predictions.length === 0) {
+    return <p className="py-4 text-sm text-secondary">Chưa có dữ liệu dự đoán.</p>
+  }
+
+  const rows = isFinished
+    ? sortedUsers
+    : sortedUsers.filter((user) => predictionsByUser[user.id])
+
+  if (rows.length === 0) {
+    return <p className="py-4 text-sm text-secondary">Chưa có dự đoán cho trận này.</p>
+  }
 
   return (
     <div className="border-t border-secondary/10 bg-neutral/50 px-2 py-3">
@@ -63,17 +84,30 @@ function PredictionMatrixContent({ matchId, usersById }) {
           </tr>
         </TableHead>
         <TableBody>
-          {sorted.map((p) => (
-            <tr key={p.id}>
-              <TableCell>{usersById[p.userId]?.name ?? p.userId}</TableCell>
-              <TableCell>
-                {formatPrediction(p.predictedHome, p.predictedAway, p.isStar)}
-              </TableCell>
-              <TableCell className="font-semibold">
-                {p.pointsEarned != null ? p.pointsEarned : '—'}
-              </TableCell>
-            </tr>
-          ))}
+          {rows.map((user) => {
+            const prediction = predictionsByUser[user.id]
+            return (
+              <tr key={user.id}>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>
+                  {prediction ? (
+                    formatPrediction(prediction.predictedHome, prediction.predictedAway, prediction.isStar)
+                  ) : (
+                    <span className="text-secondary">Không dự đoán</span>
+                  )}
+                </TableCell>
+                <TableCell className="font-semibold">
+                  {prediction
+                    ? prediction.pointsEarned != null
+                      ? prediction.pointsEarned
+                      : '—'
+                    : isFinished
+                      ? 0
+                      : '—'}
+                </TableCell>
+              </tr>
+            )
+          })}
         </TableBody>
       </Table>
     </div>
@@ -84,10 +118,18 @@ function PredictionMatrixContent({ matchId, usersById }) {
  * @param {{
  *   matchId: string
  *   usersById: Record<string, import('../../types/index.js').User>
+ *   isFinished: boolean
  *   isExpanded: boolean
  * }} props
  */
-export function PredictionMatrix({ matchId, usersById, isExpanded }) {
+export function PredictionMatrix({ matchId, usersById, isFinished, isExpanded }) {
   if (!isExpanded) return null
-  return <PredictionMatrixContent key={matchId} matchId={matchId} usersById={usersById} />
+  return (
+    <PredictionMatrixContent
+      key={matchId}
+      matchId={matchId}
+      usersById={usersById}
+      isFinished={isFinished}
+    />
+  )
 }
